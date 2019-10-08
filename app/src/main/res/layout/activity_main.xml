@@ -6,12 +6,8 @@
     android:background="#FFFFFF"
     tools:context=".UI.MainActivity">
 
-    <EditText
-        android:id="@+id/contentTextView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:gravity="center"
-        android:hint="test"
-        android:inputType="textMultiLine" />
+        android:layout_height="match_parent" />
 </FrameLayout>
