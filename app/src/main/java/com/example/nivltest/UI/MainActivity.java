@@ -3,14 +3,15 @@ package com.example.nivltest.UI;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.nivltest.AppModel;
+import com.example.nivltest.Mediator.Mediator;
 import com.example.nivltest.Net.ApodData;
-import com.example.nivltest.Net.NasaApi;
+import com.example.nivltest.Net.Net;
 import com.example.nivltest.R;
 
 import java.text.ParseException;
@@ -19,28 +20,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements AppModel.UI
 {
     public static final  String TAG = "MAIN_ACTIVITY";
-    private static final  String NASA_KEY = "8YFsEZHG8jVZvXHFH5Fr9HrhR3OkTf7sfSdrx7qc";
 
-    private static final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("https://api.nasa.gov/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
-    private static final NasaApi nasaApi = retrofit.create(NasaApi.class);
+    private AppModel.Mediator mediator;
 
-    private RecyclerView recyclerView;
+    private RecyclerViewAdapter recyclerViewAdapter;
     List<ApodData> list = new ArrayList<>();//todo move to inner class?
 
     @Override
@@ -50,15 +39,17 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        Net net = new Net();
+        mediator = new Mediator(net);
+        mediator.attachUI(this);
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+        recyclerViewAdapter = new RecyclerViewAdapter(list);
+        recyclerView.setAdapter(recyclerViewAdapter);
 
-        getSomeApodData(20);
-
-        recyclerView.setAdapter(new RecyclerViewAdapter(list));
-
-
+        mediator.onUIQueryApodData(20);
     }
 
     @Override
@@ -67,15 +58,8 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
     }
 
-    private void getSomeApodData(int i)
-    {
-        for (int j = 1; j < i; j++)
-        {
-            getApodData(2019, 9, j);
-        }
-    }
-
-    private void newItemNotify(ApodData apodData)
+    @Override
+    public void onItemUpdate(ApodData apodData)
     {
         list.add(apodData);
         Collections.sort(list, new Comparator<ApodData>() {
@@ -94,38 +78,12 @@ public class MainActivity extends AppCompatActivity
                 return 0;
             }
         });
-        recyclerView.getAdapter().notifyDataSetChanged();
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 
-    void getApodData(int year, int month, int day)
+    @Override
+    public void onItemsUpdate(List<ApodData> list)
     {
-        ApodData returnData = new ApodData();
-        String date = new SimpleDateFormat("yyyy-MM-dd")
-                .format(new GregorianCalendar(year, month, day).getTime());
-
-        Call<ApodData> apodData = nasaApi.getApodData(date,false, NASA_KEY);
-        apodData.enqueue(new Callback<ApodData>() {
-            @Override
-            public void onResponse(Call<ApodData> call, Response<ApodData> response)
-            {
-                if(response.isSuccessful())
-                {
-                    Log.d(TAG, "onResponse: " + response.body().getDate());
-                    newItemNotify(response.body());
-                }
-                else
-                {
-                    Log.d(TAG, "onResponse: err " + response.code() + " " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApodData> call, Throwable t)
-            {
-                Log.d(TAG, "onFailure: " + t + " " + retrofit.baseUrl());
-            }
-        });
+        //todo?
     }
-
-
 }
