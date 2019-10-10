@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextClock;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +20,7 @@ import java.util.List;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>
 {
     private List<ApodData> dataList;
+    private MainActivity.OnListInteractionListener lisener;
 
     class ViewHolder extends RecyclerView.ViewHolder
     {
@@ -39,14 +39,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             contentTextView = itemView.findViewById(R.id.content_textView);
             contentTextView.setVisibility(View.GONE);
             imageView = itemView.findViewById(R.id.imageView);
-            imageView.setVisibility(View.GONE);
+            //imageView.setVisibility(View.GONE);
 
         }
     }
 
-    public RecyclerViewAdapter(List<ApodData> data)
+    public RecyclerViewAdapter(List<ApodData> data, MainActivity.OnListInteractionListener listener)
     {
         this.dataList = data;
+        this.lisener = listener;
     }
 
     @NonNull
@@ -59,14 +60,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final RecyclerViewAdapter.ViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull final RecyclerViewAdapter.ViewHolder holder, final int position)
     {
         holder.titleTextView.setText(dataList.get(position).getTitle());
         holder.dateTextView.setText(dataList.get(position).getDate());
         holder.contentTextView.setText(dataList.get(position).getExplanation());
-        Picasso.with(holder.view.getContext())
-                .load(dataList.get(position).getUrl())
-                .into(holder.imageView);
+        if (dataList.get(position).getMedia_type().equals("image"))
+        {
+            Picasso.with(holder.view.getContext())
+                    .load(dataList.get(position).getUrl())
+                    .placeholder(R.drawable.ic_launcher_background)//todo set normal image
+                    .into(holder.imageView);
+        }
+        else
+        {
+           // holder.imageView.setImageDrawable(holder.view.getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        }
 
         holder.view.setOnClickListener(new View.OnClickListener() {
 
@@ -75,14 +84,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 if (holder.contentTextView.getVisibility() == View.GONE)
                 {
                     holder.titleTextView.setBackgroundColor(Color.GREEN);
-                    holder.contentTextView.setVisibility(View.VISIBLE);
-                    holder.imageView.setVisibility(View.VISIBLE);
+                    //holder.contentTextView.setVisibility(View.VISIBLE);
+                    //holder.imageView.setVisibility(View.VISIBLE);
+                    lisener.OnListInteraction(position);
                 }
                 else
                 {
                     holder.titleTextView.setBackgroundColor(Color.YELLOW);
-                    holder.contentTextView.setVisibility(View.GONE);
-                    holder.imageView.setVisibility(View.GONE);
+                    //holder.contentTextView.setVisibility(View.GONE);
+                    //holder.imageView.setVisibility(View.GONE);
                 }
 
             }

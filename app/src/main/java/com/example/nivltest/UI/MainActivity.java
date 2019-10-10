@@ -1,12 +1,18 @@
 package com.example.nivltest.UI;
 
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.View;
 
 import com.example.nivltest.AppModel;
 import com.example.nivltest.Mediator.Mediator;
@@ -23,14 +29,31 @@ import java.util.Date;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements AppModel.UI
+public class MainActivity extends AppCompatActivity implements AppModel.UI, ObserveFragment.OnFragmentInteractionListener
 {
     public static final  String TAG = "MAIN_ACTIVITY";
 
     private AppModel.Mediator mediator;
 
-    private RecyclerViewAdapter recyclerViewAdapter;
+    private RecyclerView recyclerView;
     List<ApodData> list = new ArrayList<>();//todo move to inner class?
+
+    private FragmentManager fragmentManager;
+    private OnListInteractionListener listener = new OnListInteractionListener() {
+        @Override
+        public void OnListInteraction(int position) {
+            setObserveFragment(position);
+        }
+    };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        //getMenuInflater().inflate();
+
+        super.onCreateOptionsMenu(menu);
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,11 +66,13 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI
         mediator = new Mediator(net);
         mediator.attachUI(this);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        fragmentManager = getSupportFragmentManager();
+
+        recyclerView = findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
-        recyclerViewAdapter = new RecyclerViewAdapter(list);
-        recyclerView.setAdapter(recyclerViewAdapter);
+
+        recyclerView.setAdapter(new RecyclerViewAdapter(list, listener));
 
         mediator.onUIQueryApodData(20);
     }
@@ -56,6 +81,15 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI
     protected void onResume()
     {
         super.onResume();
+    }
+
+    private void setObserveFragment(int position)
+    {
+        recyclerView.setVisibility(View.GONE);
+        fragmentManager.beginTransaction()
+                .add(R.id.container, new ObserveFragment(list.get(position)), ObserveFragment.TAG)
+                .commit();
+        getSupportActionBar().hide();
     }
 
     @Override
@@ -78,12 +112,41 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI
                 return 0;
             }
         });
-        recyclerViewAdapter.notifyDataSetChanged();
+        recyclerView.getAdapter().notifyDataSetChanged();
     }
 
     @Override
     public void onItemsUpdate(List<ApodData> list)
     {
         //todo?
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if (recyclerView.getVisibility() == View.GONE)
+        {
+            fragmentManager.beginTransaction()
+                    .remove(fragmentManager.findFragmentByTag(ObserveFragment.TAG))
+                    .commit();
+            recyclerView.setVisibility(View.VISIBLE);
+            getSupportActionBar().show();
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri)
+    {
+        Intent videoIntent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(videoIntent);
+    }
+
+    interface OnListInteractionListener
+    {
+        void OnListInteraction(int position);
     }
 }

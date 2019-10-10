@@ -6,6 +6,10 @@ import com.example.nivltest.AppModel;
 import com.example.nivltest.Net.ApodData;
 import com.example.nivltest.Net.Net;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 public class Mediator implements AppModel.Mediator
 {
     public static final String TAG = "MEDIATOR";
@@ -32,14 +36,19 @@ public class Mediator implements AppModel.Mediator
     @Override
     public void onUIQueryApodData(int i)
     {
-        for (int j = 1; j < i; j++)
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, -i);
+
+        for (int j = 0; j < i; j++)
         {
             net.getApodData(new Net.getApodDataCallback() {
                 @Override
                 public void onComplete(ApodData apodData) {
                     ui.onItemUpdate(apodData);
                 }
-            }, 2019, 9, j);
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
     }
 }
