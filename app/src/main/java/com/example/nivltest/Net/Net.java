@@ -33,6 +33,10 @@ public class Net implements AppModel.Network
     public interface getApodDataCallback
     {
         void onComplete(ApodData apodData);
+
+        void onCompleteError(int code);
+
+        void onFailture();
     }
 
     @Override
@@ -62,18 +66,22 @@ public class Net implements AppModel.Network
                 Log.d(TAG, "onResponse: " + response.body().getDate());
                 if(callback != null)
                 {
-
                     callback.onComplete(response.body());
                 }
             } else
             {
                 Log.d(TAG, "onResponse: err " + response.code() + " " + response.message());
+                if(callback != null)
+                {
+                    callback.onCompleteError(response.code());
+                }
             }
         }
 
         @Override
         public void onFailure(Call<ApodData> call, Throwable t) {
             Log.d(TAG, "onFailure: " + t + " " + retrofit.baseUrl());
+            callback.onFailture();
         }
     }
 

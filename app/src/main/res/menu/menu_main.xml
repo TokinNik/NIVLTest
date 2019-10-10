@@ -3,5 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+    <item android:title="@string/download_more_apod"
+        android:id="@+id/download_more_apod"
+        />
 
+    <item android:title="@string/get_apod_on_date"
+        android:id="@+id/get_apod_on_date"
+        />
 </menu>

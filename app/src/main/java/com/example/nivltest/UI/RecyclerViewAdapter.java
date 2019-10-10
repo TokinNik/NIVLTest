@@ -27,7 +27,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         final View view;
         final TextView titleTextView;
         final TextView dateTextView;
-        final TextView contentTextView;
         final ImageView imageView;
 
         ViewHolder(@NonNull View itemView)
@@ -36,8 +35,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             this.view = itemView;
             titleTextView = itemView.findViewById(R.id.title_textView);
             dateTextView = itemView.findViewById(R.id.date_textView);
-            contentTextView = itemView.findViewById(R.id.content_textView);
-            contentTextView.setVisibility(View.GONE);
             imageView = itemView.findViewById(R.id.imageView);
             //imageView.setVisibility(View.GONE);
 
@@ -64,36 +61,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     {
         holder.titleTextView.setText(dataList.get(position).getTitle());
         holder.dateTextView.setText(dataList.get(position).getDate());
-        holder.contentTextView.setText(dataList.get(position).getExplanation());
         if (dataList.get(position).getMedia_type().equals("image"))
         {
             Picasso.with(holder.view.getContext())
                     .load(dataList.get(position).getUrl())
-                    .placeholder(R.drawable.ic_launcher_background)//todo set normal image
+                    .placeholder(R.drawable.nasa_logo)//todo set normal image
                     .into(holder.imageView);
         }
         else
         {
-           // holder.imageView.setImageDrawable(holder.view.getResources().getDrawable(R.drawable.ic_launcher_foreground));
+            holder.imageView.setImageDrawable(holder.view.getContext().getResources().getDrawable(R.drawable.nasa_logo));
         }
 
         holder.view.setOnClickListener(new View.OnClickListener() {
 
             @Override
-            public void onClick(View v) {
-                if (holder.contentTextView.getVisibility() == View.GONE)
-                {
-                    holder.titleTextView.setBackgroundColor(Color.GREEN);
-                    //holder.contentTextView.setVisibility(View.VISIBLE);
-                    //holder.imageView.setVisibility(View.VISIBLE);
-                    lisener.OnListInteraction(position);
-                }
-                else
-                {
-                    holder.titleTextView.setBackgroundColor(Color.YELLOW);
-                    //holder.contentTextView.setVisibility(View.GONE);
-                    //holder.imageView.setVisibility(View.GONE);
-                }
+            public void onClick(View v)
+            {
+
+                lisener.OnListInteraction(position);
 
             }
         });

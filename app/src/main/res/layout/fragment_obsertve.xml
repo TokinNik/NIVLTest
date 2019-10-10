@@ -11,19 +11,21 @@
         android:id="@+id/observe_title_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#CDDC39"
+        android:background="#2D2F31"
         android:gravity="center"
         android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textColor="@android:color/background_light" />
 
     <TextView
         android:id="@+id/observe_date_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#03A9F4"
+        android:background="#41494E"
         android:gravity="center"
         android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@android:color/darker_gray" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -60,14 +62,15 @@
                 android:id="@+id/observe_content_textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#00BCD4"
+                android:background="#595B5D"
                 android:gravity="center"
                 android:paddingLeft="5dp"
                 android:paddingTop="5dp"
                 android:paddingRight="5dp"
                 android:paddingBottom="5dp"
                 android:text="TextView"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@android:color/background_light" />
         </LinearLayout>
     </ScrollView>
 

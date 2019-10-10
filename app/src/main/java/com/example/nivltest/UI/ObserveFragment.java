@@ -65,7 +65,7 @@ public class ObserveFragment extends Fragment
             {
                 Picasso.with(view.getContext())
                         .load(observeApodData.getUrl())
-                        .placeholder(R.drawable.ic_launcher_background)//todo set normal image
+                        .placeholder(R.drawable.nasa_logo)//todo set normal image
                         .into(((ImageView)view.findViewById(R.id.observe_imageView)));
                 view.findViewById(R.id.observe_videoButton).setVisibility(View.GONE);
             }

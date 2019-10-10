@@ -3,6 +3,7 @@ package com.example.nivltest;
 import com.example.nivltest.Net.ApodData;
 import com.example.nivltest.Net.Net;
 
+import java.util.Date;
 import java.util.List;
 
 public interface AppModel
@@ -11,7 +12,11 @@ public interface AppModel
     {
         void onItemUpdate(ApodData apodData);
 
-        void onItemsUpdate(List<ApodData> list);
+        void onItemsUpdate(ApodData apodData);
+
+        void setErrorMessage(int code);
+
+        void setConnectionLostMessage();
     }
 
     interface Network
@@ -21,10 +26,14 @@ public interface AppModel
 
     interface Mediator
     {
-        void onUIQueryApodData(int i);
+        void getSomeApodData(int i);
+
+        void getSingleApodData(int year, int month, int day);
 
         void attachUI(AppModel.UI ui);
 
         void detachUI();
+
+        void refresh();
     }
 }

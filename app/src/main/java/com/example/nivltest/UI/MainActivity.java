@@ -1,18 +1,26 @@
 package com.example.nivltest.UI;
 
 
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.ImageButton;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.example.nivltest.AppModel;
 import com.example.nivltest.Mediator.Mediator;
@@ -26,30 +34,34 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements AppModel.UI, ObserveFragment.OnFragmentInteractionListener
 {
     public static final  String TAG = "MAIN_ACTIVITY";
-
+    private static final int START_IITEMS_COUNT = 20;
     private AppModel.Mediator mediator;
 
     private RecyclerView recyclerView;
+    private Button updateButton;
     List<ApodData> list = new ArrayList<>();//todo move to inner class?
 
     private FragmentManager fragmentManager;
     private OnListInteractionListener listener = new OnListInteractionListener() {
         @Override
         public void OnListInteraction(int position) {
-            setObserveFragment(position);
+            setObserveFragment(list.get(position));
         }
     };
+    private MenuItem downloadMoreApodItem;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        //getMenuInflater().inflate();
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        downloadMoreApodItem = menu.findItem(R.id.download_more_apod);
 
         super.onCreateOptionsMenu(menu);
         return true;
@@ -69,12 +81,67 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI, Obse
         fragmentManager = getSupportFragmentManager();
 
         recyclerView = findViewById(R.id.recyclerView);
-
         recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
-
         recyclerView.setAdapter(new RecyclerViewAdapter(list, listener));
 
-        mediator.onUIQueryApodData(20);
+        updateButton = findViewById(R.id.update_button);
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediator.refresh();
+                mediator.getSomeApodData(START_IITEMS_COUNT);
+                updateButton.setVisibility(View.GONE);
+            }
+        });
+
+        mediator.getSomeApodData(START_IITEMS_COUNT);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.download_more_apod:
+                mediator.getSomeApodData(START_IITEMS_COUNT/2);
+                return true;
+            case R.id.get_apod_on_date:
+                final DatePicker datePicker = new DatePicker(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setView(datePicker)
+                        .setTitle(R.string.date_picker)
+                        .setCancelable(true)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                GregorianCalendar calendarDatePicker = new GregorianCalendar(datePicker.getYear(), datePicker. getMonth(), datePicker.getDayOfMonth());
+                                GregorianCalendar calendarToday = new GregorianCalendar();
+                                calendarToday.setTime(new Date());
+
+                                if(calendarDatePicker.before(calendarToday))
+                                {
+                                    mediator.getSingleApodData(datePicker.getYear(), datePicker. getMonth(), datePicker.getDayOfMonth());
+                                    dialog.cancel();
+                                }
+                                else
+                                {
+                                    Toast.makeText(MainActivity.this, R.string.date_on_future_err, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+                return true;
+            default:
+                    return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -83,17 +150,23 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI, Obse
         super.onResume();
     }
 
-    private void setObserveFragment(int position)
+    private void setObserveFragment(ApodData apodData)
     {
         recyclerView.setVisibility(View.GONE);
         fragmentManager.beginTransaction()
-                .add(R.id.container, new ObserveFragment(list.get(position)), ObserveFragment.TAG)
+                .add(R.id.container, new ObserveFragment(apodData), ObserveFragment.TAG)
                 .commit();
         getSupportActionBar().hide();
     }
 
     @Override
     public void onItemUpdate(ApodData apodData)
+    {
+        setObserveFragment(apodData);
+    }
+
+    @Override
+    public void onItemsUpdate(ApodData apodData)
     {
         list.add(apodData);
         Collections.sort(list, new Comparator<ApodData>() {
@@ -116,9 +189,28 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI, Obse
     }
 
     @Override
-    public void onItemsUpdate(List<ApodData> list)
+    public void setErrorMessage(int code)
     {
-        //todo?
+        Toast.makeText(this, R.string.download_error,  Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void setConnectionLostMessage()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.connection_error)
+                .setMessage(R.string.connection_error_message)
+                .setCancelable(true)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                       dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        updateButton.setVisibility(View.VISIBLE);
     }
 
     @Override
