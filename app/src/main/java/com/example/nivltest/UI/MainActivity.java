@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements AppModel.UI, Obse
 
     private RecyclerView recyclerView;
     private Button updateButton;
-    List<ApodData> list = new ArrayList<>();//todo move to inner class?
+    List<ApodData> list = new ArrayList<>();
 
     private FragmentManager fragmentManager;
     private OnListInteractionListener listener = new OnListInteractionListener() {

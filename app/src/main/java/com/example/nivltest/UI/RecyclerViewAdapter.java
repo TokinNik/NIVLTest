@@ -65,7 +65,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         {
             Picasso.with(holder.view.getContext())
                     .load(dataList.get(position).getUrl())
-                    .placeholder(R.drawable.nasa_logo)//todo set normal image
+                    .placeholder(R.drawable.nasa_logo)
                     .into(holder.imageView);
         }
         else

@@ -65,13 +65,13 @@ public class ObserveFragment extends Fragment
             {
                 Picasso.with(view.getContext())
                         .load(observeApodData.getUrl())
-                        .placeholder(R.drawable.nasa_logo)//todo set normal image
+                        .placeholder(R.drawable.nasa_logo)
                         .into(((ImageView)view.findViewById(R.id.observe_imageView)));
                 view.findViewById(R.id.observe_videoButton).setVisibility(View.GONE);
             }
             else
             {
-                ((Button)view.findViewById(R.id.observe_videoButton)).setOnClickListener(new View.OnClickListener() {
+                (view.findViewById(R.id.observe_videoButton)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         mListener.onFragmentInteraction(Uri.parse(observeApodData.getUrl()));
@@ -81,7 +81,8 @@ public class ObserveFragment extends Fragment
         }
         else
         {
-            //todo err
+            ((TextView)view.findViewById(R.id.observe_title_textView)).setText(R.string.data_not_load);
+            ((TextView)view.findViewById(R.id.observe_content_textView)).setText(R.string.data_not_load);
         }
         return view;
     }
